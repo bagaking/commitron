@@ -36,6 +36,14 @@ The `make test` target runs:
 go test ./...
 ```
 
+For release or maintainer checks, run the broader local gate:
+
+```bash
+make check
+```
+
+The `make check` target runs the tests and verifies that all packages build.
+
 ## Usage
 
 ### Basic Usage
@@ -124,6 +132,45 @@ Commitron can be configured using command-line flags or environment variables:
 - Access Key: `-ak` flag or `VOLC_ACCESSKEY` environment variable
 - Secret Key: `-sk` flag or `VOLC_SECRETKEY` environment variable
 - API Endpoint: `-endpoint` flag or `DOUBAO_ENDPOINT` environment variable
+
+Command-line flags take precedence over environment variables. The endpoint is
+the model service or bot endpoint used to generate the commit message. Commitron
+does not require a hard-coded vendor endpoint in the repository; point the
+endpoint value at the service you operate or are authorized to use.
+
+Model selection is currently owned by the configured endpoint or upstream bot
+service. If your provider exposes model names separately, keep that selection in
+the provider-side configuration or a local wrapper rather than committing
+environment-specific model IDs to this repository.
+
+### Security and secrets
+
+Never commit real credentials or private endpoint values. Keep these values in
+your shell environment, secret manager, local `.env` file, or CI secret store:
+
+- `VOLC_ACCESSKEY`
+- `VOLC_SECRETKEY`
+- `DOUBAO_ENDPOINT` when it identifies a private or internal service
+- provider-specific model names, deployment IDs, tenant IDs, or base URLs that
+  should not be public
+
+Use placeholders such as `YOUR_ACCESS_KEY`, `YOUR_SECRET_KEY`, and
+`YOUR_MODEL_ENDPOINT` in documentation, tests, issues, and pull requests. Before
+publishing a release, inspect staged changes for accidental secrets, private
+URLs, local paths, and machine-specific configuration.
+
+### Release readiness
+
+Before tagging or publishing a release:
+
+```bash
+make check
+git diff --check
+```
+
+Confirm the README examples still match `commitron comment --help`, the install
+command uses the intended module path, and no credential, endpoint, or local
+machine value is staged for commit.
 
 ### Custom Prompts
 
