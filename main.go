@@ -63,7 +63,7 @@ Environment Variables:
    %s	Endpoint for the API (alternative to -endpoint)
 
 Example:
-   commitron %s --access_key your_access_key --secret_key your_secret_key --diff \"...\"`, coze.EnvKeyVOLCAccessKey, coze.EnvKeyVOLCSecretKey, coze.EnvKeyDoubaoEndpoint, CMDNameComment)
+   commitron %s --access_key your_access_key --secret_key your_secret_key --endpoint your_doubao_endpoint --diff \"...\"`, coze.EnvKeyVOLCAccessKey, coze.EnvKeyVOLCSecretKey, coze.EnvKeyDoubaoEndpoint, CMDNameComment)
 	}).End.Action(func(c *cli.Context) error {
 		diffInfo := c.String("diff")
 		ak := c.String("access_key")
