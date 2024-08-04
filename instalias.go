@@ -95,7 +95,7 @@ func testGitConfig() (gitConfigPath string, gitConfigContent []byte, err error) 
 
 	// 读取现有的全局 Git 配置
 	if gitConfigContent, err = os.ReadFile(strings.TrimSpace(gitConfigPath)); err != nil {
-		return "", nil, irr.Wrap(err, "Error reading global Git config file: %v")
+		return "", nil, irr.Wrap(err, "Error reading global Git config file")
 	}
 
 	// 检查是否已经存在相同的 Git Alias

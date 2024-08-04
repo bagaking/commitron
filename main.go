@@ -51,7 +51,7 @@ informative commit comments`
 	app.Child(CMDNameComment).Flags(
 		&cli.StringFlag{Name: "diff", Usage: "The diff information", Aliases: []string{"d"}, Required: true},
 		&cli.StringFlag{Name: "access_key", Usage: fmt.Sprintf("Access key for the API (alternative to %s)", coze.EnvKeyVOLCAccessKey), Aliases: []string{"ak"}, Required: false},
-		&cli.StringFlag{Name: "secret_key", Usage: fmt.Sprintf("Secret key for the API (alternative to %s)", coze.EnvKeyVOLCAccessKey), Aliases: []string{"sk"}, Required: false},
+		&cli.StringFlag{Name: "secret_key", Usage: fmt.Sprintf("Secret key for the API (alternative to %s)", coze.EnvKeyVOLCSecretKey), Aliases: []string{"sk"}, Required: false},
 		&cli.StringFlag{Name: "endpoint", Usage: fmt.Sprintf("Endpoint for generating the comment (alternative to  %s)", coze.EnvKeyDoubaoEndpoint), Aliases: []string{"e"}, Required: false},
 		&cli.StringFlag{Name: "prompt", Usage: "Custom prompt for generating the comment", Aliases: []string{"p"}, Required: false},
 	).Set.Custom(func(c *cli.Command) {
@@ -63,7 +63,7 @@ Environment Variables:
    %s	Endpoint for the API (alternative to -endpoint)
 
 Example:
-   commitron %s -ak your_access_key -sk your_secret_key -diff \"...\"`, coze.EnvKeyVOLCAccessKey, coze.EnvKeyVOLCAccessKey, coze.EnvKeyDoubaoEndpoint, CMDNameComment)
+   commitron %s --access_key your_access_key --secret_key your_secret_key --diff \"...\"`, coze.EnvKeyVOLCAccessKey, coze.EnvKeyVOLCSecretKey, coze.EnvKeyDoubaoEndpoint, CMDNameComment)
 	}).End.Action(func(c *cli.Context) error {
 		diffInfo := c.String("diff")
 		ak := c.String("access_key")
