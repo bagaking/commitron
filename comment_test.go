@@ -40,11 +40,7 @@ func TestAutoCommentRejectsInvalidInputBeforeModelCall(t *testing.T) {
 		},
 	}
 
-	originalAsk := askCommitQuestion
-	t.Cleanup(func() {
-		askCommitQuestion = originalAsk
-	})
-	askCommitQuestion = func(context.Context, string, string, string) (string, error) {
+	ask := func(context.Context, string, string, string) (string, error) {
 		t.Fatal("autoComment called the model before validating required input")
 		return "", nil
 	}
@@ -57,7 +53,7 @@ func TestAutoCommentRejectsInvalidInputBeforeModelCall(t *testing.T) {
 				t.Setenv("DOUBAO_ENDPOINT", "")
 			}
 
-			err := autoComment(context.Background(), tt.diff, tt.ak, tt.sk, tt.ep, "")
+			err := autoCommentWithAsk(context.Background(), tt.diff, tt.ak, tt.sk, tt.ep, "", ask)
 			if err == nil {
 				t.Fatal("autoComment() error = nil, want validation error")
 			}
@@ -65,6 +61,34 @@ func TestAutoCommentRejectsInvalidInputBeforeModelCall(t *testing.T) {
 				t.Fatalf("autoComment() error = %q, want substring %q", err, tt.wantErr)
 			}
 		})
+	}
+}
+
+func TestAutoCommentPassesCallerContextToModel(t *testing.T) {
+	type contextKey struct{}
+	ctx := context.WithValue(context.Background(), contextKey{}, "caller-context")
+
+	var gotContextValue interface{}
+	ask := func(ctx context.Context, endpoint, prompt, question string) (string, error) {
+		gotContextValue = ctx.Value(contextKey{})
+		if endpoint != "test-endpoint" {
+			t.Fatalf("endpoint = %q, want %q", endpoint, "test-endpoint")
+		}
+		if prompt == "" {
+			t.Fatal("prompt is empty")
+		}
+		if !strings.Contains(question, "DiffInfo") {
+			t.Fatalf("question = %q, want built diff question", question)
+		}
+		return "fix(test): keep caller context", nil
+	}
+
+	err := autoCommentWithAsk(ctx, "diff --git a/a.txt b/a.txt\n", "test-access-key", "test-secret-key", "test-endpoint", "custom prompt", ask)
+	if err != nil {
+		t.Fatalf("autoCommentWithAsk returned error: %v", err)
+	}
+	if gotContextValue != "caller-context" {
+		t.Fatalf("model context value = %v, want caller context value", gotContextValue)
 	}
 }
 
