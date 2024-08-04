@@ -6,10 +6,10 @@ import (
 	"os"
 
 	"github.com/bagaking/botheater/driver/coze"
+	"github.com/bagaking/easycmd"
 	"github.com/urfave/cli/v2"
 
 	"github.com/bagaking/botheater/bot"
-	"github.com/bagaking/easycmd"
 )
 
 const (
@@ -30,7 +30,7 @@ var defaultConf = bot.Config{
 	},
 }
 
-func runApp() error {
+func newAppBuilder() *easycmd.Builder {
 	app := easycmd.New("commitron").Set.Custom(func(command *cli.Command) {
 		command.Usage = `
 Commitron is an AI-powered command-line tool that automatically generates
@@ -42,10 +42,15 @@ informative commit comments`
 	app.Child(CMDNameInstallAlias).Set.Usage("install the Git alias").End.Action(func(c *cli.Context) error { return installAlias() })
 
 	app.Child(CMDNameInsight).Set.Usage("insight the code changes").End.Flags(
-		&cli.StringFlag{Name: "commiter", Usage: "The commiter", Required: true},
+		&cli.StringFlag{
+			Name:     "committer",
+			Usage:    "The committer (legacy alias: --commiter)",
+			Aliases:  []string{"commiter"},
+			Required: true,
+		},
 	).Action(func(c *cli.Context) error {
-		commiter := c.String("commiter")
-		return insight(commiter)
+		committer := c.String("committer")
+		return insight(committer)
 	})
 
 	app.Child(CMDNameComment).Flags(
@@ -73,7 +78,11 @@ Example:
 		return autoComment(c.Context, diffInfo, ak, sk, ep, pp)
 	})
 
-	return app.RunBaseAsApp()
+	return app
+}
+
+func runApp() error {
+	return newAppBuilder().RunBaseAsApp()
 }
 
 func main() {

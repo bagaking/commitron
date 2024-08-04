@@ -299,27 +299,27 @@ func getMainBranchCommits(user string) ([]string, error) {
 }
 
 // insight 显示用户的提交记录和状态信息
-func insight(commiter string) error {
+func insight(committer string) error {
 	// 获取用户的提交记录
-	commits, err := getUserCommits(commiter)
+	commits, err := getUserCommits(committer)
 	if err != nil {
 		return err
 	}
 
 	// 获取用户的代码量统计
-	stats, err := getUserStats(commiter)
+	stats, err := getUserStats(committer)
 	if err != nil {
 		return err
 	}
 
 	// 获取用户的提交习惯
-	commitHabits, err := getUserCommitHabits(commiter)
+	commitHabits, err := getUserCommitHabits(committer)
 	if err != nil {
 		return err
 	}
 
 	// 获取用户代码量最大的前 10 次提交
-	topCommits, err := getTopCommits(commiter)
+	topCommits, err := getTopCommits(committer)
 	if err != nil {
 		return err
 	}
@@ -331,7 +331,7 @@ func insight(commiter string) error {
 	topDirs := getTopDirectories(stats.DirChanges, stats.DirAdded, stats.DirRemoved)
 
 	// 获取主干分支的提交记录
-	mainBranchCommits, err := getMainBranchCommits(commiter)
+	mainBranchCommits, err := getMainBranchCommits(committer)
 	if err != nil {
 		fmt.Printf("Warning: error getting main branch commits: %v\n", err)
 		// return err
@@ -356,7 +356,7 @@ func insight(commiter string) error {
 	sb := strings.Builder{}
 	sb.WriteString("\n\033[1;34m# User status \033[0m\n")
 	sb.WriteString("\n\033[1;34m## Overall \033[0m\n\n")
-	sb.WriteString(fmt.Sprintf("User %s has made \033[1;32m%d\033[0m commits\n\n", commiter, len(commits)))
+	sb.WriteString(fmt.Sprintf("User %s has made \033[1;32m%d\033[0m commits\n\n", committer, len(commits)))
 	sb.WriteString(fmt.Sprintf("- Main branch commits: \033[1;32m%d\033[0m\n", len(mainCommits)))
 	sb.WriteString(fmt.Sprintf("- Non-main branch commits: \033[1;31m%d\033[0m\n", len(nonMainCommits)))
 	sb.WriteString(fmt.Sprintf("- Total lines added: \033[1;32m%d\033[0m\n", stats.TotalAdded))

@@ -109,11 +109,12 @@ go run . comment --help
 Show local Git activity insight for one committer:
 
 ```bash
-commitron insight --commiter "Author Name"
+commitron insight --committer "Author Name"
 ```
 
 `insight` reads local Git history and reports commit and line-change summaries
-for the requested committer. It does not call the model endpoint.
+for the requested committer. The legacy misspelled `--commiter` flag remains
+available as a compatibility alias. It does not call the model endpoint.
 
 ## Git Alias
 
