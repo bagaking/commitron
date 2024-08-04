@@ -115,9 +115,21 @@ func buildQuestion(diffInfo string) string {
 
 	// 如果筛选后的 diff 信息仍然超过 32k,则进行截断
 	if utils.CountTokens(diffInfo) > maxDiffLength {
-		return string([]rune(diffInfo)[:maxDiffLength])
+		return truncateRunes(diffInfo, maxDiffLength)
 	}
 	return diffInfo
+}
+
+func truncateRunes(s string, maxRunes int) string {
+	if maxRunes <= 0 {
+		return ""
+	}
+
+	runes := []rune(s)
+	if len(runes) <= maxRunes {
+		return s
+	}
+	return string(runes[:maxRunes])
 }
 
 // SimpleQuestion sends a question to the bot and returns the generated answer.
