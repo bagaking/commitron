@@ -3,9 +3,10 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/bagaking/botheater/driver/coze"
 	"github.com/urfave/cli/v2"
-	"os"
 
 	"github.com/bagaking/botheater/bot"
 	"github.com/bagaking/easycmd"
@@ -45,7 +46,6 @@ informative commit comments`
 	).Action(func(c *cli.Context) error {
 		commiter := c.String("commiter")
 		return insight(commiter)
-
 	})
 
 	app.Child(CMDNameComment).Flags(
