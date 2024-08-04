@@ -46,12 +46,13 @@ After installation, you can use Commitron directly:
 commitron comment \
   --access_key YOUR_ACCESS_KEY \
   --secret_key YOUR_SECRET_KEY \
+  --endpoint YOUR_DOUBAO_ENDPOINT \
   --diff "$(git diff --cached)"
 ```
 
-`YOUR_ACCESS_KEY` and `YOUR_SECRET_KEY` are example placeholders. Replace them
-with your own credentials, or omit the flags when the matching environment
-variables are already configured.
+`YOUR_ACCESS_KEY`, `YOUR_SECRET_KEY`, and `YOUR_DOUBAO_ENDPOINT` are example
+placeholders. Replace them with your own credentials and endpoint, or omit the
+flags when the matching environment variables are already configured.
 
 ### Installing Git Alias
 
@@ -82,6 +83,7 @@ commitron comment --diff "$(git diff --cached)"
 commitron comment \
   --access_key YOUR_ACCESS_KEY \
   --secret_key YOUR_SECRET_KEY \
+  --endpoint YOUR_DOUBAO_ENDPOINT \
   --diff "$(git diff --cached)"
 ```
 
@@ -91,6 +93,7 @@ commitron comment \
 commitron comment \
   --access_key YOUR_ACCESS_KEY \
   --secret_key YOUR_SECRET_KEY \
+  --endpoint YOUR_DOUBAO_ENDPOINT \
   --diff "$(git diff)"
 ```
 
@@ -100,6 +103,7 @@ commitron comment \
 commitron comment \
   --access_key YOUR_ACCESS_KEY \
   --secret_key YOUR_SECRET_KEY \
+  --endpoint YOUR_DOUBAO_ENDPOINT \
   --diff "$(git diff HEAD -- path/to/your/file)"
 ```
 
@@ -109,6 +113,7 @@ commitron comment \
 commitron comment \
   --access_key YOUR_ACCESS_KEY \
   --secret_key YOUR_SECRET_KEY \
+  --endpoint YOUR_DOUBAO_ENDPOINT \
   --diff "$(git blame path/to/your/file)"
 ```
 
