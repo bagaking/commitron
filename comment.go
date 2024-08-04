@@ -45,8 +45,14 @@ func autoCommentWithAsk(ctx context.Context, diff, ak, sk, ep, pp string, ask as
 	if ep == "" {
 		return irr.Error("Please provide the endpoint using flags or environment variables")
 	}
+	previousAccessKey := coze.VOLC_ACCESSKEY
+	previousSecretKey := coze.VOLC_SECRETKEY
 	coze.VOLC_ACCESSKEY = ak
 	coze.VOLC_SECRETKEY = sk
+	defer func() {
+		coze.VOLC_ACCESSKEY = previousAccessKey
+		coze.VOLC_SECRETKEY = previousSecretKey
+	}()
 
 	// Set the prompt for the AI model
 	prompt := typer.Or(pp, `# Role:你是一个训练有素的代码分析员, 请根据以下的代码差异信息，生成一个简洁的提交注释

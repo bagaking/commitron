@@ -95,12 +95,8 @@ func TestAutoCommentPassesCallerContextToModel(t *testing.T) {
 }
 
 func TestAutoCommentUsesResolvedCredentialFlags(t *testing.T) {
-	oldAccessKey := coze.VOLC_ACCESSKEY
-	oldSecretKey := coze.VOLC_SECRETKEY
-	t.Cleanup(func() {
-		coze.VOLC_ACCESSKEY = oldAccessKey
-		coze.VOLC_SECRETKEY = oldSecretKey
-	})
+	coze.VOLC_ACCESSKEY = "previous-access-key"
+	coze.VOLC_SECRETKEY = "previous-sk"
 
 	t.Setenv("VOLC_ACCESSKEY", "env-access-key")
 	t.Setenv("VOLC_SECRETKEY", "env-sk")
@@ -119,6 +115,12 @@ func TestAutoCommentUsesResolvedCredentialFlags(t *testing.T) {
 	err := autoCommentWithAsk(context.Background(), "diff --git a/a.txt b/a.txt\n", "flag-access-key", "flag-sk", "flag-endpoint", "", ask)
 	if err != nil {
 		t.Fatalf("autoCommentWithAsk() error = %v, want nil", err)
+	}
+	if coze.VOLC_ACCESSKEY != "previous-access-key" {
+		t.Fatalf("access key after autoCommentWithAsk = %q, want restored previous value", coze.VOLC_ACCESSKEY)
+	}
+	if coze.VOLC_SECRETKEY != "previous-sk" {
+		t.Fatalf("secret key after autoCommentWithAsk = %q, want restored previous value", coze.VOLC_SECRETKEY)
 	}
 }
 
