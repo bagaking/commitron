@@ -94,7 +94,7 @@ func TestAutoCommentPassesCallerContextToModel(t *testing.T) {
 	}
 }
 
-func TestAutoCommentUsesResolvedCredentialFlags(t *testing.T) {
+func TestAutoCommentUsesResolvedFlags(t *testing.T) {
 	coze.VOLC_ACCESSKEY = "previous-access-key"
 	coze.VOLC_SECRETKEY = "previous-sk"
 
@@ -102,12 +102,15 @@ func TestAutoCommentUsesResolvedCredentialFlags(t *testing.T) {
 	t.Setenv("VOLC_SECRETKEY", "env-sk")
 	t.Setenv("DOUBAO_ENDPOINT", "env-endpoint")
 
-	ask := func(context.Context, string, string, string) (string, error) {
+	ask := func(_ context.Context, endpoint, _, _ string) (string, error) {
 		if coze.VOLC_ACCESSKEY != "flag-access-key" {
 			t.Errorf("resolved access key = %q, want %q", coze.VOLC_ACCESSKEY, "flag-access-key")
 		}
 		if coze.VOLC_SECRETKEY != "flag-sk" {
 			t.Errorf("resolved secret key = %q, want %q", coze.VOLC_SECRETKEY, "flag-sk")
+		}
+		if endpoint != "flag-endpoint" {
+			t.Errorf("resolved endpoint = %q, want %q", endpoint, "flag-endpoint")
 		}
 		return "fix(comment): use flag credentials", nil
 	}
