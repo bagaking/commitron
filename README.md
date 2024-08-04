@@ -29,7 +29,7 @@ go install github.com/bagaking/commitron@latest
 After installation, you can use Commitron directly:
 
 ```bash
-commitron -ak YOUR_ACCESS_KEY -sk YOUR_SECRET_KEY -diff "$(git diff --cached)"
+commitron comment -ak YOUR_ACCESS_KEY -sk YOUR_SECRET_KEY -diff "$(git diff --cached)"
 ```
 
 ### Installing Git Alias
@@ -53,22 +53,24 @@ This is useful for previewing the message or using Commitron with different inpu
 
 1. Generate message from staged changes:
 ```bash
-   commitron -ak YOUR_ACCESS_KEY -sk YOUR_SECRET_KEY -diff "$(git diff --cached)"
+   commitron comment --diff "$(git diff --cached)"
+   #or
+   commitron comment -ak YOUR_ACCESS_KEY -sk YOUR_SECRET_KEY -diff "$(git diff --cached)"
 ```
 
 2. Generate message from unstaged changes:
 ```bash
-   commitron -ak YOUR_ACCESS_KEY -sk YOUR_SECRET_KEY -diff "$(git diff)"
+   commitron comment -ak YOUR_ACCESS_KEY -sk YOUR_SECRET_KEY -diff "$(git diff)"
 ```
 
 3. Generate message for a specific file:
 ```bash
-   commitron -ak YOUR_ACCESS_KEY -sk YOUR_SECRET_KEY -diff "$(git diff HEAD -- path/to/your/file)"
+   commitron comment -ak YOUR_ACCESS_KEY -sk YOUR_SECRET_KEY -diff "$(git diff HEAD -- path/to/your/file)"
 ```
 
 4. Generate message based on git blame:
 ```bash
-   commitron -ak YOUR_ACCESS_KEY -sk YOUR_SECRET_KEY -diff "$(git blame path/to/your/file)"
+   commitron comment -ak YOUR_ACCESS_KEY -sk YOUR_SECRET_KEY -diff "$(git blame path/to/your/file)"
 ```
 
 ### Configuration
@@ -84,7 +86,7 @@ Commitron can be configured using command-line flags or environment variables:
 You can customize the AI prompt used for generating commit messages:
 
 ```bash
-commitron -prompt "Your custom prompt here" ...
+commitron comment -prompt "Your custom prompt here" ...
 ```
 
 ## Contributing
