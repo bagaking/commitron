@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
@@ -11,7 +10,7 @@ import (
 	"github.com/khicago/irr"
 )
 
-// installAlias installs the Git commit-msg hook.
+// installAlias installs the Git cz alias.
 func installAlias() error {
 	// 检查配置文件可用性
 	gitConfigPath, gitConfigContent, err := testGitConfig()
@@ -19,59 +18,19 @@ func installAlias() error {
 		return err
 	}
 
-	reader := bufio.NewReader(os.Stdin)
-
-	fmt.Println("Note: inline credentials or endpoint values may be written to your global git config in plain text.")
-	fmt.Println("Prefer environment variables and decline inline prompts unless you intentionally want values embedded in the alias.")
-
-	// Ask user if they want to specify ak and sk
-	fmt.Print("Do you want to specify access key and secret key? (y/n): ")
-	response, _ := reader.ReadString('\n')
-	response = strings.TrimSpace(response)
-
-	var accessKey, secretKey string
-	if response == "y" {
-		fmt.Print("Enter Access Key: ")
-		accessKey, _ = reader.ReadString('\n')
-		accessKey = strings.TrimSpace(accessKey)
-
-		fmt.Print("Enter Secret Key: ")
-		secretKey, _ = reader.ReadString('\n')
-		secretKey = strings.TrimSpace(secretKey)
-	}
-
-	fmt.Print("Do you want to specify endpoint? (y/n): ")
-	response, _ = reader.ReadString('\n')
-	response = strings.TrimSpace(response)
-
-	var endpointStr string
-	if response == "y" {
-		fmt.Print("Enter Doubao Endpoint: ")
-		endpointStr, _ = reader.ReadString('\n')
-		endpointStr = strings.TrimSpace(endpointStr)
-	}
-
-	commentStr := "commitron " + CMDNameComment
-	if accessKey != "" {
-		commentStr += fmt.Sprintf(" -ak %s ", accessKey)
-	}
-	if secretKey != "" {
-		commentStr += fmt.Sprintf(" -sk %s", secretKey)
-	}
-	if endpointStr != "" {
-		commentStr += fmt.Sprintf(" -endpoint %s ", endpointStr)
-	}
+	fmt.Println("Installing Git Alias 'cz'.")
+	fmt.Println("The alias reads credentials and endpoint from the environment used by `commitron comment`.")
+	fmt.Println("Set VOLC_ACCESSKEY, VOLC_SECRETKEY, and DOUBAO_ENDPOINT in your shell or secret manager before running `git cz`.")
 
 	// 注入 Git Alias
-	aliasStr := makeAliasStr(commentStr)
+	aliasStr := makeAliasStr()
 	// fmt.Printf("start config alias in %s\n", gitConfigPath)
 
 	// 将 Git Alias 追加到全局 Git 配置文件
+	gitConfigPath = strings.TrimSpace(gitConfigPath)
 
-	err = os.WriteFile(strings.TrimSpace(gitConfigPath),
-		append(gitConfigContent, []byte(aliasStr)...), 0o644)
-	if err != nil {
-		return irr.Wrap(err, "error writing global git config file")
+	if err = writeGitConfigWithAlias(gitConfigPath, gitConfigContent, aliasStr); err != nil {
+		return err
 	}
 
 	fmt.Println("success: Git Alias 'cz' has been configured.")
@@ -109,11 +68,21 @@ func testGitConfig() (gitConfigPath string, gitConfigContent []byte, err error) 
 	return gitConfigPath, gitConfigContent, nil
 }
 
-func makeAliasStr(commitronCmd string) string {
-	return fmt.Sprintf(`
+func writeGitConfigWithAlias(gitConfigPath string, gitConfigContent []byte, aliasStr string) error {
+	if err := os.WriteFile(gitConfigPath, append(gitConfigContent, []byte(aliasStr)...), 0o600); err != nil {
+		return irr.Wrap(err, "error writing global git config file")
+	}
+	if err := os.Chmod(gitConfigPath, 0o600); err != nil {
+		return irr.Wrap(err, "error setting global git config file permissions")
+	}
+	return nil
+}
+
+func makeAliasStr() string {
+	return `
 [alias]
     cz = "!f() { \
-        if [ -z \"$(which commitron)\" ]; then \
+        if ! command -v commitron >/dev/null 2>&1; then \
             echo 'commitron could not be found. Please install it by running:'; \
             echo 'go install github.com/bagaking/commitron@latest'; \
             exit 1; \
@@ -129,7 +98,7 @@ func makeAliasStr(commitronCmd string) string {
         }; \
         show_animation & \
         animation_pid=$!; \
-        COMMIT_MSG_CONTENT=$(%s --diff \"$COMMITRON_DIFF\"); \
+        COMMIT_MSG_CONTENT=$(commitron comment --diff \"$COMMITRON_DIFF\"); \
         COMMITRON_EXIT_CODE=$?; \
         kill $animation_pid > /dev/null 2>&1; \
         wait $animation_pid 2>/dev/null; \
@@ -142,5 +111,5 @@ func makeAliasStr(commitronCmd string) string {
         fi; \
         git commit -e -m \"$COMMIT_MSG_CONTENT\"; \
     }; f"
-`, commitronCmd)
+`
 }

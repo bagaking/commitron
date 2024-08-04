@@ -14,7 +14,8 @@ message before the commit is created.
 - Use either command-line flags or environment variables for credentials and the
   generation endpoint.
 - Let callers override the default prompt with `--prompt`.
-- Install a convenience `cz` alias into global Git config when requested.
+- Install a convenience `cz` alias into global Git config when requested. The
+  alias reads credentials and endpoint from environment variables at runtime.
 
 ## What You Still Own
 
@@ -105,6 +106,15 @@ Check the current command surface:
 go run . comment --help
 ```
 
+Show local Git activity insight for one committer:
+
+```bash
+commitron insight --commiter "Author Name"
+```
+
+`insight` reads local Git history and reports commit and line-change summaries
+for the requested committer. It does not call the model endpoint.
+
 ## Git Alias
 
 Install the convenience alias:
@@ -123,11 +133,13 @@ The alias reads `git diff --cached`, calls `commitron comment`, and then runs
 `git commit -e -m "$COMMIT_MSG_CONTENT"`. Git opens the message for editing
 before creating the commit.
 
-Credential risk: `install_alias` can prompt for an access key, secret key, and
-endpoint. If you enter values there, they may be written into global Git config
-in plain text as `-ak`, `-sk`, or `-endpoint` arguments. Prefer setting
-`VOLC_ACCESSKEY`, `VOLC_SECRETKEY`, and `DOUBAO_ENDPOINT` in your shell or
-secret manager, then decline the inline credential prompts.
+Credential handling: `install_alias` does not prompt for an access key, secret
+key, or endpoint, and the generated alias does not embed `-ak`, `-sk`, or
+`-endpoint` arguments. Set `VOLC_ACCESSKEY`, `VOLC_SECRETKEY`, and
+`DOUBAO_ENDPOINT` in your shell or secret manager before running `git cz`.
+
+Config permissions: installation rewrites the global Git config with `0600`
+permissions so alias content is not world-readable.
 
 Alias scope risk: the alias name is `cz`, and installation refuses to continue
 if a global `cz` alias already exists. Review your global Git config before
