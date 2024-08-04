@@ -29,14 +29,14 @@ func autoCommentWithAsk(ctx context.Context, diff, ak, sk, ep, pp string, ask as
 	logrus.SetOutput(io.Discard)
 
 	// Check if the -diff flag is provided
-	if diff == "" {
+	if strings.TrimSpace(diff) == "" {
 		return irr.Error("Please provide the diff information using the --diff (or -d) flag")
 	}
 
 	// Use command-line flags for access key and secret key if provided
-	ak = typer.Or(ak, coze.EnvKeyVOLCAccessKey.Read())
-	sk = typer.Or(sk, coze.EnvKeyVOLCSecretKey.Read())
-	ep = typer.Or(ep, coze.EnvKeyDoubaoEndpoint.Read())
+	ak = firstNonBlank(ak, coze.EnvKeyVOLCAccessKey.Read())
+	sk = firstNonBlank(sk, coze.EnvKeyVOLCSecretKey.Read())
+	ep = firstNonBlank(ep, coze.EnvKeyDoubaoEndpoint.Read())
 
 	// Check if the access key and secret key are set
 	if ak == "" || sk == "" {
@@ -85,6 +85,15 @@ feat (commitron): Add Git commit-msg hook installation
 	// Print the generated comment
 	fmt.Println(comment)
 	return nil
+}
+
+func firstNonBlank(values ...string) string {
+	for _, value := range values {
+		if trimmed := strings.TrimSpace(value); trimmed != "" {
+			return trimmed
+		}
+	}
+	return ""
 }
 
 func buildQuestion(diffInfo string) string {

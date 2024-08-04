@@ -26,6 +26,14 @@ func TestAutoCommentRejectsInvalidInputBeforeModelCall(t *testing.T) {
 			wantErr: "Please provide the diff information",
 		},
 		{
+			name:    "blank diff",
+			diff:    " \t\n",
+			ak:      "test-access-key",
+			sk:      "test-secret-key",
+			ep:      "test-endpoint",
+			wantErr: "Please provide the diff information",
+		},
+		{
 			name:     "missing credentials",
 			diff:     "diff --git a/a.txt b/a.txt\n",
 			ep:       "test-endpoint",
@@ -116,6 +124,39 @@ func TestAutoCommentUsesResolvedFlags(t *testing.T) {
 	}
 
 	err := autoCommentWithAsk(context.Background(), "diff --git a/a.txt b/a.txt\n", "flag-access-key", "flag-sk", "flag-endpoint", "", ask)
+	if err != nil {
+		t.Fatalf("autoCommentWithAsk() error = %v, want nil", err)
+	}
+	if coze.VOLC_ACCESSKEY != "previous-access-key" {
+		t.Fatalf("access key after autoCommentWithAsk = %q, want restored previous value", coze.VOLC_ACCESSKEY)
+	}
+	if coze.VOLC_SECRETKEY != "previous-sk" {
+		t.Fatalf("secret key after autoCommentWithAsk = %q, want restored previous value", coze.VOLC_SECRETKEY)
+	}
+}
+
+func TestAutoCommentFallsBackToEnvForBlankCredentialFlags(t *testing.T) {
+	coze.VOLC_ACCESSKEY = "previous-access-key"
+	coze.VOLC_SECRETKEY = "previous-sk"
+
+	t.Setenv("VOLC_ACCESSKEY", "env-access-key")
+	t.Setenv("VOLC_SECRETKEY", "env-sk")
+	t.Setenv("DOUBAO_ENDPOINT", "env-endpoint")
+
+	ask := func(_ context.Context, endpoint, _, _ string) (string, error) {
+		if coze.VOLC_ACCESSKEY != "env-access-key" {
+			t.Errorf("resolved access key = %q, want %q", coze.VOLC_ACCESSKEY, "env-access-key")
+		}
+		if coze.VOLC_SECRETKEY != "env-sk" {
+			t.Errorf("resolved secret key = %q, want %q", coze.VOLC_SECRETKEY, "env-sk")
+		}
+		if endpoint != "env-endpoint" {
+			t.Errorf("resolved endpoint = %q, want %q", endpoint, "env-endpoint")
+		}
+		return "fix(comment): resolve blank flags from env", nil
+	}
+
+	err := autoCommentWithAsk(context.Background(), "diff --git a/a.txt b/a.txt\n", " \t", "\n", " ", "", ask)
 	if err != nil {
 		t.Fatalf("autoCommentWithAsk() error = %v, want nil", err)
 	}
