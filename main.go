@@ -2,6 +2,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -21,6 +22,18 @@ const (
 	CMDNameInsight      = "insight"
 )
 
+type appActions struct {
+	installAlias func() error
+	insight      func(string) error
+	comment      func(ctx context.Context, diff, ak, sk, ep, pp string) error
+}
+
+var defaultAppActions = appActions{
+	installAlias: installAlias,
+	insight:      insight,
+	comment:      autoComment,
+}
+
 // defaultConf is the default configuration for the bot.
 var defaultConf = bot.Config{
 	Endpoint:   "",
@@ -31,6 +44,10 @@ var defaultConf = bot.Config{
 }
 
 func newAppBuilder() *easycmd.Builder {
+	return newAppBuilderWithActions(defaultAppActions)
+}
+
+func newAppBuilderWithActions(actions appActions) *easycmd.Builder {
 	app := easycmd.New("commitron").Set.Custom(func(command *cli.Command) {
 		command.Usage = `
 Commitron is an AI-powered command-line tool that automatically generates
@@ -39,7 +56,7 @@ your diff information and uses advanced language models to create concise,
 informative commit comments`
 	}).End
 
-	app.Child(CMDNameInstallAlias).Set.Usage("install the Git alias").End.Action(func(c *cli.Context) error { return installAlias() })
+	app.Child(CMDNameInstallAlias).Set.Usage("install the Git alias").End.Action(func(c *cli.Context) error { return actions.installAlias() })
 
 	app.Child(CMDNameInsight).Set.Usage("insight the code changes").End.Flags(
 		&cli.StringFlag{
@@ -50,7 +67,7 @@ informative commit comments`
 		},
 	).Action(func(c *cli.Context) error {
 		committer := c.String("committer")
-		return insight(committer)
+		return actions.insight(committer)
 	})
 
 	app.Child(CMDNameComment).Flags(
@@ -75,7 +92,7 @@ Example:
 		sk := c.String("secret_key")
 		ep := c.String("endpoint")
 		pp := c.String("prompt")
-		return autoComment(c.Context, diffInfo, ak, sk, ep, pp)
+		return actions.comment(c.Context, diffInfo, ak, sk, ep, pp)
 	})
 
 	return app
