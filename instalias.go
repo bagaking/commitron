@@ -21,6 +21,9 @@ func installAlias() error {
 
 	reader := bufio.NewReader(os.Stdin)
 
+	fmt.Println("Note: inline credentials or endpoint values may be written to your global git config in plain text.")
+	fmt.Println("Prefer environment variables and decline inline prompts unless you intentionally want values embedded in the alias.")
+
 	// Ask user if they want to specify ak and sk
 	fmt.Print("Do you want to specify access key and secret key? (y/n): ")
 	response, _ := reader.ReadString('\n')
