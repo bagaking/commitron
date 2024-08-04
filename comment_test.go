@@ -183,6 +183,41 @@ func TestAutoCommentFallsBackToEnvForBlankCredentialFlags(t *testing.T) {
 	}
 }
 
+func TestAutoCommentResolvesMixedFlagAndEnvValues(t *testing.T) {
+	restoreCozeCredentials(t)
+
+	coze.VOLC_ACCESSKEY = "previous-access-key"
+	coze.VOLC_SECRETKEY = "previous-sk"
+
+	t.Setenv("VOLC_ACCESSKEY", "env-ak")
+	t.Setenv("VOLC_SECRETKEY", "env-sk")
+	t.Setenv("DOUBAO_ENDPOINT", "env-endpoint")
+
+	ask := func(_ context.Context, endpoint, _, _ string) (string, error) {
+		if coze.VOLC_ACCESSKEY != "flag-ak" {
+			t.Errorf("resolved access key = %q, want %q", coze.VOLC_ACCESSKEY, "flag-ak")
+		}
+		if coze.VOLC_SECRETKEY != "env-sk" {
+			t.Errorf("resolved secret key = %q, want %q", coze.VOLC_SECRETKEY, "env-sk")
+		}
+		if endpoint != "flag-endpoint" {
+			t.Errorf("resolved endpoint = %q, want %q", endpoint, "flag-endpoint")
+		}
+		return "fix(comment): resolve mixed flag and env credentials", nil
+	}
+
+	err := autoCommentWithAsk(context.Background(), "diff --git a/a.txt b/a.txt\n", "flag-ak", " ", "flag-endpoint", "", ask)
+	if err != nil {
+		t.Fatalf("autoCommentWithAsk() error = %v, want nil", err)
+	}
+	if coze.VOLC_ACCESSKEY != "previous-access-key" {
+		t.Fatalf("access key after autoCommentWithAsk = %q, want restored previous value", coze.VOLC_ACCESSKEY)
+	}
+	if coze.VOLC_SECRETKEY != "previous-sk" {
+		t.Fatalf("secret key after autoCommentWithAsk = %q, want restored previous value", coze.VOLC_SECRETKEY)
+	}
+}
+
 func TestTruncateRunes(t *testing.T) {
 	tests := []struct {
 		name     string
