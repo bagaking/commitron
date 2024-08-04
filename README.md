@@ -22,6 +22,20 @@ To install Commitron, run:
 go install github.com/bagaking/commitron@latest
 ```
 
+## Local validation
+
+Run the project test suite before opening a pull request:
+
+```bash
+make test
+```
+
+The `make test` target runs:
+
+```bash
+go test ./...
+```
+
 ## Usage
 
 ### Basic Usage
