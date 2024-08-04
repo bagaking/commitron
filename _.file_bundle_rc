@@ -1,0 +1,11 @@
+entry = [
+    "./*.go",
+    "go.mod",
+    "*.md"
+]
+exclude = [
+    ".bundle",
+    "go.sum"
+]
+output = "bundle.bundle"
+description = ""

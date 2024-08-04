@@ -14,6 +14,7 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 *.bundle.txt
+*.bundle
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
@@ -21,3 +22,4 @@
 # Go workspace file
 go.work
 .idea
+set_env.sh
