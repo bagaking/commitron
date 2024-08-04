@@ -8,6 +8,17 @@ import (
 	"github.com/bagaking/botheater/driver/coze"
 )
 
+func restoreCozeCredentials(t *testing.T) {
+	t.Helper()
+
+	previousAccessKey := coze.VOLC_ACCESSKEY
+	previousSecretKey := coze.VOLC_SECRETKEY
+	t.Cleanup(func() {
+		coze.VOLC_ACCESSKEY = previousAccessKey
+		coze.VOLC_SECRETKEY = previousSecretKey
+	})
+}
+
 func TestAutoCommentRejectsInvalidInputBeforeModelCall(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -103,6 +114,8 @@ func TestAutoCommentPassesCallerContextToModel(t *testing.T) {
 }
 
 func TestAutoCommentUsesResolvedFlags(t *testing.T) {
+	restoreCozeCredentials(t)
+
 	coze.VOLC_ACCESSKEY = "previous-access-key"
 	coze.VOLC_SECRETKEY = "previous-sk"
 
@@ -136,6 +149,8 @@ func TestAutoCommentUsesResolvedFlags(t *testing.T) {
 }
 
 func TestAutoCommentFallsBackToEnvForBlankCredentialFlags(t *testing.T) {
+	restoreCozeCredentials(t)
+
 	coze.VOLC_ACCESSKEY = "previous-access-key"
 	coze.VOLC_SECRETKEY = "previous-sk"
 
