@@ -1,8 +1,8 @@
 # Commitron
 
-Commitron is an AI-powered command-line tool that automatically generates 
-meaningful Git commit messages based on your code changes. It analyzes your 
-diff information and uses advanced language models to create concise, 
+Commitron is an AI-powered command-line tool that automatically generates
+meaningful Git commit messages based on your code changes. It analyzes your
+diff information and uses advanced language models to create concise,
 informative commit comments.
 
 ## Features
@@ -43,8 +43,15 @@ go test ./...
 After installation, you can use Commitron directly:
 
 ```bash
-commitron comment --access_key YOUR_ACCESS_KEY --secret_key YOUR_SECRET_KEY --diff "$(git diff --cached)"
+commitron comment \
+  --access_key YOUR_ACCESS_KEY \
+  --secret_key YOUR_SECRET_KEY \
+  --diff "$(git diff --cached)"
 ```
+
+`YOUR_ACCESS_KEY` and `YOUR_SECRET_KEY` are example placeholders. Replace them
+with your own credentials, or omit the flags when the matching environment
+variables are already configured.
 
 ### Installing Git Alias
 
@@ -54,7 +61,8 @@ For seamless integration with your Git workflow, install the Commitron alias:
 commitron install_alias
 ```
 
-This will add a `cz` alias to your Git configuration. Now you can use Commitron by simply typing:
+This will add a `cz` alias to your Git configuration. Now you can use Commitron
+by simply typing:
 
 ```bash
 git cz
@@ -62,29 +70,46 @@ git cz
 
 ### Dry Run / Preview Mode
 
-You can generate a commit message without actually committing changes. 
-This is useful for previewing the message or using Commitron with different inputs:
+You can generate a commit message without actually committing changes.
+This is useful for previewing the message or using Commitron with different
+inputs:
 
 1. Generate message from staged changes:
+
 ```bash
-   commitron comment --diff "$(git diff --cached)"
-   #or
-   commitron comment --access_key YOUR_ACCESS_KEY --secret_key YOUR_SECRET_KEY --diff "$(git diff --cached)"
+commitron comment --diff "$(git diff --cached)"
+# Or with explicit credentials:
+commitron comment \
+  --access_key YOUR_ACCESS_KEY \
+  --secret_key YOUR_SECRET_KEY \
+  --diff "$(git diff --cached)"
 ```
 
 2. Generate message from unstaged changes:
+
 ```bash
-   commitron comment --access_key YOUR_ACCESS_KEY --secret_key YOUR_SECRET_KEY --diff "$(git diff)"
+commitron comment \
+  --access_key YOUR_ACCESS_KEY \
+  --secret_key YOUR_SECRET_KEY \
+  --diff "$(git diff)"
 ```
 
 3. Generate message for a specific file:
+
 ```bash
-   commitron comment --access_key YOUR_ACCESS_KEY --secret_key YOUR_SECRET_KEY --diff "$(git diff HEAD -- path/to/your/file)"
+commitron comment \
+  --access_key YOUR_ACCESS_KEY \
+  --secret_key YOUR_SECRET_KEY \
+  --diff "$(git diff HEAD -- path/to/your/file)"
 ```
 
 4. Generate message based on git blame:
+
 ```bash
-   commitron comment --access_key YOUR_ACCESS_KEY --secret_key YOUR_SECRET_KEY --diff "$(git blame path/to/your/file)"
+commitron comment \
+  --access_key YOUR_ACCESS_KEY \
+  --secret_key YOUR_SECRET_KEY \
+  --diff "$(git blame path/to/your/file)"
 ```
 
 ### Configuration
