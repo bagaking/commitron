@@ -1,3 +1,5 @@
+BUILD_DIR := .build
+
 .PHONY: run test build check bundle cz
 
 run:
@@ -7,7 +9,8 @@ test:
 	go test ./...
 
 build:
-	go build ./...
+	mkdir -p $(BUILD_DIR)
+	go build -o $(BUILD_DIR)/ .
 
 check: test build
 

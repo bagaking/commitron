@@ -54,11 +54,11 @@ After installation, you can use Commitron directly:
 commitron comment \
   --access_key YOUR_ACCESS_KEY \
   --secret_key YOUR_SECRET_KEY \
-  --endpoint YOUR_DOUBAO_ENDPOINT \
+  --endpoint YOUR_MODEL_ENDPOINT \
   --diff "$(git diff --cached)"
 ```
 
-`YOUR_ACCESS_KEY`, `YOUR_SECRET_KEY`, and `YOUR_DOUBAO_ENDPOINT` are example
+`YOUR_ACCESS_KEY`, `YOUR_SECRET_KEY`, and `YOUR_MODEL_ENDPOINT` are example
 placeholders. Replace them with your own credentials and endpoint, or omit the
 flags when the matching environment variables are already configured.
 
@@ -70,8 +70,14 @@ For seamless integration with your Git workflow, install the Commitron alias:
 commitron install_alias
 ```
 
-This will add a `cz` alias to your Git configuration. Now you can use Commitron
-by simply typing:
+This writes a `cz` alias to your global Git configuration. If you enter
+credentials or an endpoint during `install_alias`, the resulting global alias
+may include `-ak`, `-sk`, or `-endpoint` values in plain text. Prefer configuring
+credentials with shell environment variables before installing the alias, and
+decline the prompts for inline credentials unless you intentionally want those
+values embedded in your global Git config.
+
+Now you can use Commitron by simply typing:
 
 ```bash
 git cz
@@ -91,7 +97,7 @@ commitron comment --diff "$(git diff --cached)"
 commitron comment \
   --access_key YOUR_ACCESS_KEY \
   --secret_key YOUR_SECRET_KEY \
-  --endpoint YOUR_DOUBAO_ENDPOINT \
+  --endpoint YOUR_MODEL_ENDPOINT \
   --diff "$(git diff --cached)"
 ```
 
@@ -101,7 +107,7 @@ commitron comment \
 commitron comment \
   --access_key YOUR_ACCESS_KEY \
   --secret_key YOUR_SECRET_KEY \
-  --endpoint YOUR_DOUBAO_ENDPOINT \
+  --endpoint YOUR_MODEL_ENDPOINT \
   --diff "$(git diff)"
 ```
 
@@ -111,7 +117,7 @@ commitron comment \
 commitron comment \
   --access_key YOUR_ACCESS_KEY \
   --secret_key YOUR_SECRET_KEY \
-  --endpoint YOUR_DOUBAO_ENDPOINT \
+  --endpoint YOUR_MODEL_ENDPOINT \
   --diff "$(git diff HEAD -- path/to/your/file)"
 ```
 
@@ -121,7 +127,7 @@ commitron comment \
 commitron comment \
   --access_key YOUR_ACCESS_KEY \
   --secret_key YOUR_SECRET_KEY \
-  --endpoint YOUR_DOUBAO_ENDPOINT \
+  --endpoint YOUR_MODEL_ENDPOINT \
   --diff "$(git blame path/to/your/file)"
 ```
 
@@ -138,6 +144,17 @@ the model service or bot endpoint used to generate the commit message. Commitron
 does not require a hard-coded vendor endpoint in the repository; point the
 endpoint value at the service you operate or are authorized to use.
 
+For local use, prefer exporting secrets in your shell session:
+
+```bash
+export VOLC_ACCESSKEY="YOUR_ACCESS_KEY"
+export VOLC_SECRETKEY="YOUR_SECRET_KEY"
+export DOUBAO_ENDPOINT="YOUR_MODEL_ENDPOINT"
+```
+
+If you keep credentials in a local config file, use one that is ignored by your
+repository, loaded by your shell or secret manager, and never committed.
+
 Model selection is currently owned by the configured endpoint or upstream bot
 service. If your provider exposes model names separately, keep that selection in
 the provider-side configuration or a local wrapper rather than committing
@@ -146,7 +163,8 @@ environment-specific model IDs to this repository.
 ### Security and secrets
 
 Never commit real credentials or private endpoint values. Keep these values in
-your shell environment, secret manager, local `.env` file, or CI secret store:
+your shell environment, secret manager, ignored local configuration, or CI
+secret store:
 
 - `VOLC_ACCESSKEY`
 - `VOLC_SECRETKEY`
