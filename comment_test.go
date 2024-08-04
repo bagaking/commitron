@@ -4,6 +4,8 @@ import (
 	"context"
 	"strings"
 	"testing"
+
+	"github.com/bagaking/botheater/driver/coze"
 )
 
 func TestAutoCommentRejectsInvalidInputBeforeModelCall(t *testing.T) {
@@ -89,6 +91,34 @@ func TestAutoCommentPassesCallerContextToModel(t *testing.T) {
 	}
 	if gotContextValue != "caller-context" {
 		t.Fatalf("model context value = %v, want caller context value", gotContextValue)
+	}
+}
+
+func TestAutoCommentUsesResolvedCredentialFlags(t *testing.T) {
+	oldAccessKey := coze.VOLC_ACCESSKEY
+	oldSecretKey := coze.VOLC_SECRETKEY
+	t.Cleanup(func() {
+		coze.VOLC_ACCESSKEY = oldAccessKey
+		coze.VOLC_SECRETKEY = oldSecretKey
+	})
+
+	t.Setenv("VOLC_ACCESSKEY", "env-access-key")
+	t.Setenv("VOLC_SECRETKEY", "env-sk")
+	t.Setenv("DOUBAO_ENDPOINT", "env-endpoint")
+
+	ask := func(context.Context, string, string, string) (string, error) {
+		if coze.VOLC_ACCESSKEY != "flag-access-key" {
+			t.Errorf("resolved access key = %q, want %q", coze.VOLC_ACCESSKEY, "flag-access-key")
+		}
+		if coze.VOLC_SECRETKEY != "flag-sk" {
+			t.Errorf("resolved secret key = %q, want %q", coze.VOLC_SECRETKEY, "flag-sk")
+		}
+		return "fix(comment): use flag credentials", nil
+	}
+
+	err := autoCommentWithAsk(context.Background(), "diff --git a/a.txt b/a.txt\n", "flag-access-key", "flag-sk", "flag-endpoint", "", ask)
+	if err != nil {
+		t.Fatalf("autoCommentWithAsk() error = %v, want nil", err)
 	}
 }
 
