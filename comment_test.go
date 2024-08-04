@@ -1,9 +1,72 @@
 package main
 
 import (
+	"context"
 	"strings"
 	"testing"
 )
+
+func TestAutoCommentRejectsInvalidInputBeforeModelCall(t *testing.T) {
+	tests := []struct {
+		name     string
+		diff     string
+		ak       string
+		sk       string
+		ep       string
+		wantErr  string
+		clearEnv bool
+	}{
+		{
+			name:    "empty diff",
+			ak:      "test-access-key",
+			sk:      "test-secret-key",
+			ep:      "test-endpoint",
+			wantErr: "Please provide the diff information",
+		},
+		{
+			name:     "missing credentials",
+			diff:     "diff --git a/a.txt b/a.txt\n",
+			ep:       "test-endpoint",
+			wantErr:  "Please provide the access key and secret key",
+			clearEnv: true,
+		},
+		{
+			name:     "missing endpoint",
+			diff:     "diff --git a/a.txt b/a.txt\n",
+			ak:       "test-access-key",
+			sk:       "test-secret-key",
+			wantErr:  "Please provide the endpoint",
+			clearEnv: true,
+		},
+	}
+
+	originalAsk := askCommitQuestion
+	t.Cleanup(func() {
+		askCommitQuestion = originalAsk
+	})
+	askCommitQuestion = func(context.Context, string, string, string) (string, error) {
+		t.Fatal("autoComment called the model before validating required input")
+		return "", nil
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.clearEnv {
+				t.Setenv("VOLC_ACCESSKEY", "")
+				t.Setenv("VOLC_SECRETKEY", "")
+				t.Setenv("DOUBAO_ENDPOINT", "")
+			}
+
+			err := autoComment(context.Background(), tt.diff, tt.ak, tt.sk, tt.ep, "")
+			if err == nil {
+				t.Fatal("autoComment() error = nil, want validation error")
+			}
+			if !strings.Contains(err.Error(), tt.wantErr) {
+				t.Fatalf("autoComment() error = %q, want substring %q", err, tt.wantErr)
+			}
+		})
+	}
+}
 
 func TestTruncateRunes(t *testing.T) {
 	tests := []struct {

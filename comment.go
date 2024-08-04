@@ -63,7 +63,7 @@ feat (commitron): Add Git commit-msg hook installation
 - Allow specifying access key, secret key, and endpoint during hook installation
 `)
 
-	comment, err := SimpleQuestion(context.Background(), ep, prompt, buildQuestion(diff))
+	comment, err := askCommitQuestion(context.Background(), ep, prompt, buildQuestion(diff))
 	if err != nil {
 		return irr.Wrap(err, "failed to generate comment")
 	}
@@ -131,6 +131,8 @@ func truncateRunes(s string, maxRunes int) string {
 	}
 	return string(runes[:maxRunes])
 }
+
+var askCommitQuestion = SimpleQuestion
 
 // SimpleQuestion sends a question to the bot and returns the generated answer.
 //
